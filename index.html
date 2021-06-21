@@ -117,7 +117,7 @@
 			      id  = /id=([\d_]+)/.exec(studio),
 			      aid = /aid=([\d]+)/.exec(studio),
 			      oid = /oid=([\d]+)/.exec(studio),
-			      url = "http://studio.afw.mdl.io/api/OutboundApp/AppCallback?serviceTypeId=2019&identifier=" + 
+			      url = "https://studio.afw.mdl.io/api/OutboundApp/AppCallback?serviceTypeId=2019&identifier=" + 
 							id[1] + "&accountId=" + aid[1] + "&outboundId=" + oid[1];
 			} catch(e) {
 				alert('ef:failed (invalid parameters)');
