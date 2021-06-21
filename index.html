@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>EF WebTracking</title>
+	<!-- Font Awesome -->
+	<link
+		href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"
+		rel="stylesheet"
+	/>
+	<!-- Google Fonts -->
+	<link
+		href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+		rel="stylesheet"
+	/>
+	<!-- MDB -->
+	<link
+		href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.6.0/mdb.min.css"
+		rel="stylesheet"
+	/>
+	<style>
+		.msg {
+			display: none;
+			background-color: gainsboro;
+		}
+		#purl, #event {
+			display: inline-block;
+			width: auto; 
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<form onsubmit="return false;" class="mt-4">
+			<!-- Studio tracking script input -->
+			<div class="form-outline mb-4">
+				<input 
+					type="text" 
+					id="studio" 
+					class="form-control" 
+				/>
+				<label class="form-label" for="studio">Studio tracking script</label>
+			</div>
+		
+			<!-- Submit button -->
+			<button id="create-tag" type="button" class="btn btn-primary">Create tag</button>
+			<div class="mt-4">
+				<button id="test-api" type="button" class="btn btn-success">Test api</button>
+				<input type="text" id="purl" class="form-control" placeholder="Purl" />
+				<input type="text" id="event" class="form-control" placeholder="EventID" />
+			</div>
+		</form>
+
+		<div class="form-outline mt-4">
+			<textarea class="form-control" id="tag" rows="12"></textarea>
+		</div>
+
+		<div>
+			<button id="copy-tag" type="button" class="btn btn-warning mt-2">Copy</button>
+			<span class="msg" id="msg">Copied to clipboard. </span>
+		</div>
+	</div>
+	
+	<!-- MDB -->
+	<script
+		type="text/javascript"
+		src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.6.0/mdb.min.js"
+	></script>
+	<script type="text/javascript">
+		function f(v, z, b) {
+			var c = /pid=([^;]+)/g.exec(document.cookie) || [0, document.querySelector("#purl").value],
+					q = /pid=([^&]+)/g.exec(location.href),
+					e = /evt=([^&]+)/g.exec(location.href) || [0, document.querySelector("#event").value],
+					p, d, x, a;
+
+			if(!c && !q) {
+				b('ef:failed');
+				return;
+			}
+
+			if(!c && q) {
+				p = q[1];
+				document.cookie = "pid=" + p + "; path=/; domain=" + location.host + 
+					"; expires=" + new Date(new Date().getTime()+1000*60*60*24*365).toGMTString();
+			}
+
+			if(c) {
+				p = c[1];
+			}
+
+			d = {
+				"eventid": e ? e[1] : "201917",
+				"eventoption": location.origin,
+				"dedup": p,
+				"date": (new Date()).toISOString()
+			};
+
+			x = new XMLHttpRequest();
+			x.open('POST', v);
+			x.onreadystatechange = function() {
+				if(x.readyState == 4 && x.status == 200) {
+					z('ef:success');
+				}
+				if(x.readyState == 4 && x.status != 200) {
+					b('ef:failed');
+				}
+			};
+			x.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+			x.setRequestHeader('Content-Type', 'application/json');
+			x.send(JSON.stringify(d));
+		}
+
+		async function testapi() {
+			try {
+				var studio = document.querySelector('#studio').value,
+			      id  = /id=([\d_]+)/.exec(studio),
+			      aid = /aid=([\d]+)/.exec(studio),
+			      oid = /oid=([\d]+)/.exec(studio),
+			      url = "http://studio.afw.mdl.io/api/OutboundApp/AppCallback?serviceTypeId=2019&identifier=" + 
+							id[1] + "&accountId=" + aid[1] + "&outboundId=" + oid[1];
+			} catch(e) {
+				alert('ef:failed (invalid parameters)');
+				return;
+			}
+
+			let test = new Promise((resolve, reject) => {
+				f(url, resolve, reject);
+			})
+			.then((result) => { 
+				alert(result); 
+			})
+			.catch((error) => { 
+				alert(error); 
+			});
+		}
+
+		document.querySelector('#test-api').addEventListener('click', function() {
+			let a = document.querySelector('#studio').value,
+			    b = document.querySelector('#purl').value,
+					c = document.querySelector('#event').value;
+
+			if(a && b && c) testapi();
+			else alert('ef:failed. (missing values)');
+		});
+
+		document.querySelector('#create-tag').addEventListener('click', function() {
+			let studio = document.querySelector('#studio').value;
+
+			if(!studio) {
+				alert('ef:failed. (missing values)');
+				return;
+			}
+
+			var id = /id=([\d_]+)/.exec(studio),
+			    aid = /aid=([\d]+)/.exec(studio),
+			    oid = /oid=([\d]+)/.exec(studio),
+			    pid = /pid=([^"]+)/.exec(studio),
+			    endpoint = "http://studio.afw.mdl.io/api/OutboundApp/AppCallback?serviceTypeId=2019&identifier=" + 
+						id[1] + "&accountId=" + aid[1] + "&outboundId=" + oid[1];
+		
+			a = f.toString();
+			a = a.replace(' f(v, z, b)', '()');
+			a = a.replace(' || [0, document.querySelector("#purl").value]', '');
+			a = a.replace(' || [0, document.querySelector("#event").value]', '');
+			a = a.replace('v)', '"' + endpoint + '")');
+			a = a.replace(/\t|\n|(?<!function|var|new)\s/g, '');
+			a = a.replace(/z\(|b\(/g, 'console.log(');
+			a = a.replace(/\sf\([^\)]+/g, ' f(');
+			a = `\<\!-- EnrollmentFuel: Begin --\>\n\<script type="text\/javascript"\>(` + 
+				a + `\)()<\/script\>\n\<\!-- EnrollmentFuel: End --\>`;
+			document.querySelector('#tag').value = a;
+		});
+	
+		document.querySelector('#copy-tag').addEventListener('click', function() {
+			let msg = document.querySelector('#msg'),
+			    tag = document.querySelector('#tag');
+
+			msg.textContent = msg.textContent + tag.value.length / 1000 + 'kb';
+			msg.style.display = 'inline';
+			tag.select();
+			document.execCommand('copy');
+		});
+	</script>
+</body>
+</html>
