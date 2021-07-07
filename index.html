@@ -163,7 +163,7 @@
 			a = a.replace(' f(v, z, b)', '()');
 			a = a.replace(' || [0, document.querySelector("#purl").value]', '');
 			a = a.replace(' || [0, document.querySelector("#event").value]', '');
-			a = a.replace(' v, ', '"' + endpoint + '",true)');
+			a = a.replace(' v, ', '"' + endpoint + '"');
 			a = a.replace(/\t|\n|(?<!function|var|new)\s/g, '');
 			a = a.replace(/z\(|b\(/g, 'console.log(');
 			a = a.replace(/\sf\([^\)]+/g, ' f(');
