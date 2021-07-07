@@ -69,9 +69,11 @@
 	></script>
 	<script type="text/javascript">
 		function f(v, z, b) {
-			var c = /pid=([^;]+)/g.exec(document.cookie) || [0, document.querySelector("#purl").value],
-					q = /pid=([^&]+)/g.exec(location.href),
-					e = /evt=([^&]+)/g.exec(location.href) || [0, document.querySelector("#event").value],
+			var q = /pid=([^&]+)/g.exec(location.href),
+			    c = /pid=([^;]+)/g.exec(document.cookie) || 
+					    [0, document.querySelector("#purl").value],
+					e = /evt=([^&]+)/g.exec(location.href) || 
+					    [0, document.querySelector("#event").value],
 					p, d, x, a;
 
 			if(!c && !q) {
@@ -97,7 +99,7 @@
 			};
 
 			x = new XMLHttpRequest();
-			x.open('POST', v);
+			x.open('POST', v, true);
 			x.onreadystatechange = function() {
 				if(x.readyState == 4 && x.status == 200) {
 					z('ef:success');
