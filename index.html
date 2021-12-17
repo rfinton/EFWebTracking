@@ -68,20 +68,20 @@
 		src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.6.0/mdb.min.js"
 	></script>
 	<script type="text/javascript">
-		function f(v, z, b) {
+		function f() {
 			var q = /pid=([^&]+)/g.exec(location.href),
-			    c = /pid=([^;]+)/g.exec(document.cookie) || [0, document.querySelector("#purl").value],
-					e = /evt=([^&]+)/g.exec(location.href) || [0, document.querySelector("#event").value],
+			    c = /pid=([^;]+)/g.exec(document.cookie),
+					e = /evt=([^&]+)/g.exec(location.href),
 					p, d, x, a;
 
 			if(!c && !q) {
-				b('ef:failed');
+				console.log('ef:failed');
 				return;
 			}
 
 			if(!c && q) {
 				p = q[1];
-				document.cookie = "pid=" + p + "; path=/; domain=" + location.host + 
+				document.cookie = "pid=" + p + "; samesite=strict; path=/; domain=" + location.host + 
 					"; expires=" + new Date(new Date().getTime()+1000*60*60*24*365).toGMTString();
 			}
 
@@ -100,10 +100,10 @@
 			x.open('POST', v, true);
 			x.onreadystatechange = function() {
 				if(x.readyState == 4 && x.status == 200) {
-					z('ef:success');
+					console.log('ef:success');
 				}
 				if(x.readyState == 4 && x.status != 200) {
-					b('ef:failed');
+					console.log('ef:failed');
 				}
 			};
 			x.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
@@ -112,20 +112,8 @@
 		}
 
 		async function testapi() {
-			try {
-				var studio = document.querySelector('#studio').value,
-			      id  = /id=([\d_]+)/.exec(studio),
-			      aid = /aid=([\d]+)/.exec(studio),
-			      oid = /oid=([\d]+)/.exec(studio),
-			      url = "https://studio.afw.mdl.io/api/OutboundApp/AppCallback?serviceTypeId=2019&identifier=" + 
-							id[1] + "&accountId=" + aid[1] + "&outboundId=" + oid[1];
-			} catch(e) {
-				alert('ef:failed (invalid parameters)');
-				return;
-			}
-
 			let test = new Promise((resolve, reject) => {
-				f(url, resolve, reject);
+				f(resolve, reject);
 			})
 			.then((result) => { 
 				alert(result); 
@@ -135,16 +123,7 @@
 			});
 		}
 
-		document.querySelector('#test-api').addEventListener('click', function() {
-			let a = document.querySelector('#studio').value,
-			    b = document.querySelector('#purl').value,
-					c = document.querySelector('#event').value;
-
-			if(a && b && c) testapi();
-			else alert('ef:failed. (missing values)');
-		});
-
-		document.querySelector('#create-tag').addEventListener('click', function() {
+		function createTag() {
 			let studio = document.querySelector('#studio').value;
 
 			if(!studio) {
@@ -160,19 +139,17 @@
 						id[1] + "&accountId=" + aid[1] + "&outboundId=" + oid[1];
 		
 			a = f.toString();
-			a = a.replace(' f(v, z, b)', '()');
-			a = a.replace(' || [0, document.querySelector("#purl").value]', '');
-			a = a.replace(' || [0, document.querySelector("#event").value]', '');
 			a = a.replace(' v, ', '"' + endpoint + '",');
 			a = a.replace(/\t|\n|(?<!function|var|new)\s/g, '');
-			a = a.replace(/z\(|b\(/g, 'console.log(');
+			a = a.replace(/g\(|h\(/g, 'console.log(');
 			a = a.replace(/\sf\([^\)]+/g, ' f(');
-			a = `\<\!-- EnrollmentFuel: Begin --\>\n\<script async type="text\/javascript"\>(` + 
+			document.querySelector('#tag').value = `
+				\<\!-- EnrollmentFuel: Begin --\>\n\<script async type="text\/javascript"\>(` + 
 				a + `\)()<\/script\>\n\<\!-- EnrollmentFuel: End --\>`;
-			document.querySelector('#tag').value = a;
-		});
-	
-		document.querySelector('#copy-tag').addEventListener('click', function() {
+			return a;
+		}
+
+		function copyTag() {
 			let msg = document.querySelector('#msg'),
 			    tag = document.querySelector('#tag');
 
@@ -180,7 +157,19 @@
 			msg.style.display = 'inline';
 			tag.select();
 			document.execCommand('copy');
+		}
+
+		document.querySelector('#test-api').addEventListener('click', function() {
+			let a = document.querySelector('#studio').value,
+			    b = document.querySelector('#purl').value,
+					c = document.querySelector('#event').value;
+
+			if(a && b && c) testapi();
+			else alert('ef:failed. (missing values)');
 		});
+
+		document.querySelector('#create-tag').addEventListener('click', createTag);
+		document.querySelector('#copy-tag').addEventListener('click', copyTag);
 	</script>
 </body>
 </html>
