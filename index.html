@@ -140,7 +140,7 @@
 			a = a.replace(' v, ', '"' + endpoint + '",');
 			a = a.replace(/\t|\n|(?<!function|var|new)\s/g, '');
 			// a = a.replace(/g\(|h\(/g, 'console.log(');
-			// a = a.replace(/\sf\([^\)]+/g, ' f(');
+			a = a.replace(/function f\([^\)]+/g, 'function(');
 			document.querySelector('#tag').value = `\<\!-- EnrollmentFuel: Begin --\>\n\<script async type="text\/javascript"\>(` + a + `\)()<\/script\>\n\<\!-- EnrollmentFuel: End --\>`;
 			return a;
 		}
