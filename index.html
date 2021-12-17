@@ -71,8 +71,8 @@
 		function f() {
 			var q = /pid=([^&]+)/g.exec(location.href),
 			    c = /pid=([^;]+)/g.exec(document.cookie),
-					e = /evt=([^&]+)/g.exec(location.href),
-					p, d, x, a;
+				 e = /evt=([^&]+)/g.exec(location.href),
+				 p, d, x, a;
 
 			if(!c && !q) {
 				console.log('ef:failed');
@@ -139,8 +139,8 @@
 			a = f.toString();
 			a = a.replace(' v, ', '"' + endpoint + '",');
 			a = a.replace(/\t|\n|(?<!function|var|new)\s/g, '');
-			a = a.replace(/g\(|h\(/g, 'console.log(');
-			a = a.replace(/\sf\([^\)]+/g, ' f(');
+			// a = a.replace(/g\(|h\(/g, 'console.log(');
+			// a = a.replace(/\sf\([^\)]+/g, ' f(');
 			document.querySelector('#tag').value = `\<\!-- EnrollmentFuel: Begin --\>\n\<script async type="text\/javascript"\>(` + a + `\)()<\/script\>\n\<\!-- EnrollmentFuel: End --\>`;
 			return a;
 		}
