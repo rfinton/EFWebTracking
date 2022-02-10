@@ -47,8 +47,8 @@
 			<button id="create-tag" type="button" class="btn btn-primary">Create tag</button>
 			<div class="mt-4">
 				<button id="test-api" type="button" class="btn btn-success">Test api</button>
-				<input type="text" id="purl" class="form-control" placeholder="Purl" />
-				<input type="text" id="event" class="form-control" placeholder="EventID" />
+				<input type="text" id="purl" class="form-control" placeholder="Purl" value="RayFinton" />
+				<input type="text" id="event" class="form-control" placeholder="EventID" value="201916" />
 			</div>
 		</form>
 
@@ -75,13 +75,13 @@
 				 p, d, x, a;
 
 			if(!c && !q) {
-				console.log('ef:failed');
+				console.log('ef:failed.');
 				return;
 			}
 
 			if(!c && q) {
 				p = q[1];
-				document.cookie = "pid=" + p + "; samesite=strict; path=/; domain=" + location.host + "; expires=" + new Date(new Date().getTime()+1000*60*60*24*365).toGMTString();
+				document.cookie = "pid=" + p + "; samesite=strict; path=/; domain=" + location.host + "; expires=" + new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 365).toGMTString();
 			}
 
 			if(c) {
@@ -99,10 +99,10 @@
 			x.open('POST', v, true);
 			x.onreadystatechange = function() {
 				if(x.readyState == 4 && x.status == 200) {
-					console.log('ef:success');
+					console.log('status:success');
 				}
 				if(x.readyState == 4 && x.status != 200) {
-					console.log('ef:failed');
+					console.log('status:failed');
 				}
 			};
 			x.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
@@ -110,16 +110,13 @@
 			x.send(JSON.stringify(d));
 		}
 
-		async function testapi() {
-			let test = new Promise((resolve, reject) => {
-				f(resolve, reject);
-			})
-			.then((result) => { 
-				alert(result); 
-			})
-			.catch((error) => { 
-				alert(error); 
-			});
+		function testapi(pid, event, strfunc) {
+			document.cookie = `pid=${pid}`;
+			strfunc = strfunc.replace(/<[^>]+>|\n/g, '');
+			strfunc = strfunc.replace("console.log('status:success')", "alert('Success!')");
+			strfunc = strfunc.replace("console.log('status:failed')", "alert('Failed!')");
+			strfunc = strfunc.replace("201912", event);
+			eval(strfunc);
 		}
 
 		function createTag() {
@@ -158,9 +155,10 @@
 		document.querySelector('#test-api').addEventListener('click', function() {
 			let a = document.querySelector('#studio').value,
 			    b = document.querySelector('#purl').value,
-					c = document.querySelector('#event').value;
+				 c = document.querySelector('#event').value || 201912,
+				 d = document.querySelector('textarea').value;
 
-			if(a && b && c) testapi();
+			if(a && b && c && d) testapi(b, c, d);
 			else alert('ef:failed. (missing values)');
 		});
 
